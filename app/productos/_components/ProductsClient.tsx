@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo, useEffect } from "react"
+import { useState, useMemo, useEffect, Suspense } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
 import { ProductFilters } from "./ProductFilters"
 import { ProductSearch } from "./ProductSearch"
@@ -43,15 +43,8 @@ interface ProductsClientProps {
 
 const PRODUCTS_PER_PAGE = 12
 
-// Mapeo de slugs de categorías desde el navbar
-const categorySlugMap: Record<string, string> = {
-    "pinturas": "pinturas",
-    "herramientas": "herramientas",
-    "complementos": "complementos",
-    "acabados": "acabados"
-}
-
-export const ProductsClient = ({ initialProducts, categories }: ProductsClientProps) => {
+// Componente que usa useSearchParams
+function ProductsContent({ initialProducts, categories }: ProductsClientProps) {
     const searchParams = useSearchParams()
     const router = useRouter()
 
@@ -81,27 +74,26 @@ export const ProductsClient = ({ initialProducts, categories }: ProductsClientPr
             // Buscar la categoría que coincide con el slug
             const categoriaEncontrada = categories.find(cat =>
                 cat.slug === categoriaFromURL ||
-                categorySlugMap[categoriaFromURL] === cat.slug
+                cat.slug.toLowerCase() === categoriaFromURL.toLowerCase()
             )
 
             if (categoriaEncontrada) {
                 // Seleccionar la categoría encontrada
                 setSelectedCategories([categoriaEncontrada.id])
-
-                // Opcional: Resetear a página 1
                 setCurrentPage(1)
 
-                // Opcional: Limpiar búsqueda si hay una categoría seleccionada
+                // Limpiar búsqueda si hay una categoría seleccionada
                 if (searchQuery) {
                     setSearchQuery("")
                 }
             }
         }
-    }, [searchParams, categories])
+    }, [searchParams, categories, searchQuery])
 
     // Función para manejar cambio de categorías y actualizar URL
     const handleCategoryChange = (categoryIds: string[]) => {
         setSelectedCategories(categoryIds)
+        setCurrentPage(1)
 
         // Actualizar URL si hay cambios en las categorías
         if (categoryIds.length === 1) {
@@ -120,9 +112,6 @@ export const ProductsClient = ({ initialProducts, categories }: ProductsClientPr
                 router.push(`/productos?categoria=${firstCategory.slug}`)
             }
         }
-
-        // Resetear a página 1 cuando cambian las categorías
-        setCurrentPage(1)
     }
 
     // Función para limpiar todos los filtros incluyendo URL
@@ -148,7 +137,6 @@ export const ProductsClient = ({ initialProducts, categories }: ProductsClientPr
         })
 
         products = sortProducts(products, sortBy)
-
         return products
     }, [initialProducts, selectedCategories, priceRange, showInStockOnly, showOffersOnly, searchQuery, sortBy])
 
@@ -156,11 +144,6 @@ export const ProductsClient = ({ initialProducts, categories }: ProductsClientPr
     const paginatedData = useMemo(() => {
         return paginateProducts(filteredAndSortedProducts, currentPage, PRODUCTS_PER_PAGE)
     }, [filteredAndSortedProducts, currentPage])
-
-    // Reset to page 1 when filters change
-    useMemo(() => {
-        setCurrentPage(1)
-    }, [selectedCategories, priceRange, showInStockOnly, showOffersOnly, searchQuery, sortBy])
 
     // Obtener nombre de categoría seleccionada para mostrar en el título
     const selectedCategoryName = useMemo(() => {
@@ -209,7 +192,7 @@ export const ProductsClient = ({ initialProducts, categories }: ProductsClientPr
                         <ProductFilters
                             categories={categories}
                             selectedCategories={selectedCategories}
-                            onCategoryChange={handleCategoryChange} // Usar nueva función
+                            onCategoryChange={handleCategoryChange}
                             minPrice={minProductPrice}
                             maxPrice={maxProductPrice}
                             priceRange={priceRange}
@@ -218,7 +201,7 @@ export const ProductsClient = ({ initialProducts, categories }: ProductsClientPr
                             onShowOffersOnlyChange={setShowOffersOnly}
                             showInStockOnly={showInStockOnly}
                             onShowInStockOnlyChange={setShowInStockOnly}
-                            onClearFilters={handleClearFilters} // Usar nueva función
+                            onClearFilters={handleClearFilters}
                             totalProducts={filteredAndSortedProducts.length}
                         />
                     </aside>
@@ -296,5 +279,24 @@ export const ProductsClient = ({ initialProducts, categories }: ProductsClientPr
                 </div>
             </div>
         </div>
+    )
+}
+
+// Componente principal envuelto en Suspense
+export const ProductsClient = ({ initialProducts, categories }: ProductsClientProps) => {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen bg-zinc-50 dark:bg-black flex items-center justify-center">
+                <div className="text-center space-y-4">
+                    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-accent mx-auto"></div>
+                    <p className="text-zinc-600 dark:text-zinc-400">Cargando productos...</p>
+                </div>
+            </div>
+        }>
+            <ProductsContent
+                initialProducts={initialProducts}
+                categories={categories}
+            />
+        </Suspense>
     )
 }
