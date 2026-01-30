@@ -354,7 +354,7 @@ export const Navbar = () => {
                                                     {cat.title}
                                                 </button>
 
-                                                {/* Subitems para Productos en móvil */}
+                                                {/* Subitems para Productos en Móvil */}
                                                 {cat.items && cat.items.length > 0 && (
                                                     <div className="pl-4 space-y-1">
                                                         {/* Opción para ver todos */}
