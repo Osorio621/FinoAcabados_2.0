@@ -1,0 +1,71 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String?
+  email     String   @unique
+  password  String
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+  role      Role     @default(CUSTOMER)
+
+  @@map("users")
+}
+
+model Category {
+  id       String    @id @default(cuid())
+  name     String    @unique
+  slug     String    @unique
+  products Product[]
+
+  @@map("categories")
+}
+
+model Product {
+  id            String      @id @default(cuid())
+  name          String
+  description   String
+  price         Decimal     @db.Decimal(10, 2)
+  isOffer       Boolean     @default(false) @map("is_offer")
+  isActive      Boolean     @default(true) @map("is_active")
+  discountPrice Decimal?    @map("discount_price") @db.Decimal(10, 2)
+  stock         Int         @default(0)
+  imageUrl      String?     @map("image_url")
+  categoryId    String      @map("category_id")
+  createdAt     DateTime    @default(now()) @map("created_at")
+  updatedAt     DateTime    @default(now()) @updatedAt @map("updated_at")
+  status        StockStatus @default(IN_STOCK)
+  slug          String?     @unique
+  category      Category    @relation(fields: [categoryId], references: [id])
+
+  @@index([categoryId], map: "idx_products_category")
+  @@index([slug], map: "idx_products_slug")
+  @@map("products")
+}
+
+model PasswordResetToken {
+  id      String   @id @default(cuid())
+  email   String
+  token   String   @unique
+  expires DateTime
+
+  @@unique([email, token])
+  @@map("password_reset_tokens")
+}
+
+enum Role {
+  ADMIN
+  CUSTOMER
+}
+
+enum StockStatus {
+  IN_STOCK
+  OUT_OF_STOCK
+}
