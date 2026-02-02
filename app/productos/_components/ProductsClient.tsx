@@ -108,10 +108,49 @@ function ProductsContent({ initialProducts, categories }: ProductsClientProps) {
         router.replace("/productos", { scroll: false }) // Limpiar parámetros de la URL sin hacer scroll
     }
 
+    // Obtener todos los IDs de categorías (incluyendo hijos) para el filtrado
+    const allSelectedCategoryIds = useMemo(() => {
+        if (selectedCategories.length === 0) return []
+
+        const ids = new Set<string>()
+
+        const collectAllChildIds = (cats: Category[]) => {
+            const allIds: string[] = []
+            cats.forEach(cat => {
+                allIds.push(cat.id)
+                if (cat.children && cat.children.length > 0) {
+                    allIds.push(...collectAllChildIds(cat.children))
+                }
+            })
+            return allIds
+        }
+
+        const addIdsRecursive = (categoryId: string) => {
+            // Buscar la categoría seleccionada en cualquier nivel
+            const findAndCollect = (cats: Category[]): boolean => {
+                for (const cat of cats) {
+                    if (cat.id === categoryId) {
+                        ids.add(cat.id)
+                        if (cat.children && cat.children.length > 0) {
+                            collectAllChildIds(cat.children).forEach(childId => ids.add(childId))
+                        }
+                        return true
+                    }
+                    if (cat.children && findAndCollect(cat.children)) return true
+                }
+                return false
+            }
+            findAndCollect(categories)
+        }
+
+        selectedCategories.forEach(id => addIdsRecursive(id))
+        return Array.from(ids)
+    }, [selectedCategories, categories])
+
     // Apply filters and sorting
     const filteredAndSortedProducts = useMemo(() => {
         let products = filterProducts(initialProducts, {
-            categoryIds: selectedCategories,
+            categoryIds: allSelectedCategoryIds,
             minPrice: priceRange[0],
             maxPrice: priceRange[1],
             inStockOnly: showInStockOnly,
@@ -121,7 +160,7 @@ function ProductsContent({ initialProducts, categories }: ProductsClientProps) {
 
         products = sortProducts(products, sortBy)
         return products
-    }, [initialProducts, selectedCategories, priceRange, showInStockOnly, showOffersOnly, searchQuery, sortBy])
+    }, [initialProducts, allSelectedCategoryIds, priceRange, showInStockOnly, showOffersOnly, searchQuery, sortBy])
 
     // Paginate results
     const paginatedData = useMemo(() => {

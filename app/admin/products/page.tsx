@@ -6,7 +6,8 @@ import { ProductList } from "./_components/product-list"
 export default async function AdminProductsPage() {
     const session = await auth()
 
-    if (session?.user?.role !== "ADMIN") {
+    // @ts-ignore
+    if (session?.user?.role !== "ADMIN" && session?.user?.role !== "SUPER_ADMIN") {
         return redirect("/")
     }
 

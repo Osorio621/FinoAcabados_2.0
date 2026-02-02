@@ -16,7 +16,8 @@ import { formatPrice } from "@/lib/product-utils"
 export default async function AdminDashboard() {
     const session = await auth()
 
-    if (session?.user?.role !== "ADMIN") {
+    // @ts-ignore
+    if (session?.user?.role !== "ADMIN" && session?.user?.role !== "SUPER_ADMIN") {
         return redirect("/")
     }
 

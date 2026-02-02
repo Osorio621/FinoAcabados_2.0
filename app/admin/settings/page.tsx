@@ -6,7 +6,8 @@ import { ProfileForm } from "./_components/profile-form"
 export default async function SettingsPage() {
     const session = await auth()
 
-    if (session?.user?.role !== "ADMIN") {
+    // @ts-ignore
+    if (session?.user?.role !== "ADMIN" && session?.user?.role !== "SUPER_ADMIN") {
         return redirect("/")
     }
 

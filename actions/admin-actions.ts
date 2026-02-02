@@ -8,7 +8,8 @@ import { serializeProduct } from "@/lib/product-utils"
 // Utility to verify admin role
 const checkAdmin = async () => {
     const session = await auth()
-    if (session?.user?.role !== "ADMIN") {
+    // @ts-ignore
+    if (session?.user?.role !== "ADMIN" && session?.user?.role !== "SUPER_ADMIN") {
         throw new Error("No autorizado")
     }
     return session
@@ -133,17 +134,17 @@ export async function updateProductOffer(id: string, isOffer: boolean, discountP
    CATEGORY ACTIONS
    ========================================== */
 
-export async function createCategory(values: { 
-    name: string, 
-    slug: string, 
+export async function createCategory(values: {
+    name: string,
+    slug: string,
     parentId?: string | null  // ← Cambiado a aceptar null
 }) {
     try {
         await checkAdmin()
 
         const category = await db.category.create({
-            data: { 
-                name: values.name, 
+            data: {
+                name: values.name,
                 slug: values.slug,
                 parentId: values.parentId || null
             },
@@ -163,23 +164,23 @@ export async function createCategory(values: {
     }
 }
 
-export async function updateCategory(id: string, values: { 
-    name: string, 
-    slug: string, 
+export async function updateCategory(id: string, values: {
+    name: string,
+    slug: string,
     parentId?: string | null  // ← Cambiado a aceptar null
 }) {
     try {
         await checkAdmin()
-        
+
         // Evitar que una categoría sea su propio padre
         if (values.parentId === id) {
-             return { error: "Una categoría no puede ser su propio padre" }
+            return { error: "Una categoría no puede ser su propio padre" }
         }
 
         const category = await db.category.update({
             where: { id },
-            data: { 
-                name: values.name, 
+            data: {
+                name: values.name,
                 slug: values.slug,
                 parentId: values.parentId || null
             },

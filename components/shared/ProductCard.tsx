@@ -18,6 +18,7 @@ interface ProductCardProps {
     imageUrl?: string | null
     isOffer?: boolean
     category?: string
+    subcategory?: string
     stock: number
 }
 
@@ -29,6 +30,7 @@ export const ProductCard = ({
     imageUrl,
     isOffer,
     category,
+    subcategory,
     stock
 }: ProductCardProps) => {
     const { data: session } = useSession()
@@ -78,7 +80,7 @@ export const ProductCard = ({
                                 // Future: Add to cart logic
                                 console.log("Add to cart:", slug)
                             }}
-                            className="h-10 w-10 bg-white dark:bg-zinc-800 rounded-full flex items-center justify-center text-primary shadow-lg hover:bg-accent hover:text-white transition-all transform hover:scale-110"
+                            className="h-10 w-10 bg-white dark:bg-zinc-900 rounded-full flex items-center justify-center text-primary dark:text-white shadow-lg border border-zinc-100 dark:border-zinc-800 hover:bg-accent hover:text-white dark:hover:bg-accent dark:hover:border-accent transition-all transform hover:scale-110"
                         >
                             <ShoppingCart className="h-5 w-5" />
                         </button>
@@ -87,7 +89,7 @@ export const ProductCard = ({
                                 e.preventDefault()
                                 router.push(`/productos/${slug}`)
                             }}
-                            className="h-10 w-10 bg-white dark:bg-zinc-800 rounded-full flex items-center justify-center text-primary shadow-lg hover:bg-accent hover:text-white transition-all transform hover:scale-110"
+                            className="h-10 w-10 bg-white dark:bg-zinc-900 rounded-full flex items-center justify-center text-primary dark:text-white shadow-lg border border-zinc-100 dark:border-zinc-800 hover:bg-accent hover:text-white dark:hover:bg-accent dark:hover:border-accent transition-all transform hover:scale-110"
                         >
                             <Eye className="h-5 w-5" />
                         </button>
@@ -97,8 +99,17 @@ export const ProductCard = ({
                 {/* Content */}
                 <div className="p-5 space-y-3">
                     <div className="flex justify-between items-start">
-                        <div>
-                            <p className="text-[10px] font-bold text-accent uppercase tracking-widest mb-1">{category || "General"}</p>
+                        <div className="flex-1 mr-2">
+                            <div className="flex flex-col mb-1">
+                                <span className="text-[10px] font-bold text-accent uppercase tracking-widest leading-tight">
+                                    {category || "General"}
+                                </span>
+                                {subcategory && (
+                                    <span className="text-[10px] font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-widest leading-tight">
+                                        {subcategory}
+                                    </span>
+                                )}
+                            </div>
                             <h3 className="text-sm font-bold text-primary dark:text-white line-clamp-1 group-hover:text-accent transition-colors">{name}</h3>
                         </div>
                         <div className="flex items-center gap-1">

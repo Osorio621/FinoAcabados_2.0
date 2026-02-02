@@ -20,7 +20,8 @@ export default auth((req) => {
         if (!isLoggedIn) {
             return NextResponse.redirect(new URL("/auth/login", nextUrl))
         }
-        if (role !== "ADMIN") {
+        // @ts-ignore
+        if (role !== "ADMIN" && role !== "SUPER_ADMIN") {
             return NextResponse.redirect(new URL("/", nextUrl))
         }
         return NextResponse.next()

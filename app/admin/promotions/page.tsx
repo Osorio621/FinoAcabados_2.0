@@ -6,7 +6,8 @@ import { PromotionList } from "./_components/promotion-list"
 export default async function PromotionsPage() {
     const session = await auth()
 
-    if (session?.user?.role !== "ADMIN") {
+    // @ts-ignore
+    if (session?.user?.role !== "ADMIN" && session?.user?.role !== "SUPER_ADMIN") {
         return redirect("/")
     }
 

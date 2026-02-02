@@ -13,10 +13,13 @@ import {
     BadgePercent,
     Menu,
     X,
+    Users
 } from "lucide-react"
+import { motion, AnimatePresence } from "framer-motion"
+import { useSession } from "next-auth/react"
 import { cn } from "@/lib/utils"
 
-const routes = [
+const staticRoutes = [
     {
         label: "Dashboard",
         icon: LayoutDashboard,
@@ -47,12 +50,21 @@ const routes = [
         href: "/admin/categories",
         color: "text-emerald-500",
     },
-    {
-        label: "Configuración",
-        icon: Settings,
-        href: "/admin/settings",
-    },
 ]
+
+const settingsRoute = {
+    label: "Configuración",
+    icon: Settings,
+    href: "/admin/settings",
+    color: "text-zinc-500",
+}
+
+const superAdminRoute = {
+    label: "Usuarios",
+    icon: Users,
+    href: "/admin/users",
+    color: "text-red-500",
+}
 
 interface AdminShellProps {
     children: React.ReactNode
@@ -61,6 +73,16 @@ interface AdminShellProps {
 export function AdminShell({ children }: AdminShellProps) {
     const { isSidebarOpen, setIsSidebarOpen, toggleSidebar, isMobileOpen, setIsMobileOpen } = useSidebar()
     const pathname = usePathname()
+    const { data: session } = useSession()
+
+    const routes = [...staticRoutes]
+
+    // @ts-ignore
+    if (session?.user?.role === "SUPER_ADMIN") {
+        routes.push(superAdminRoute)
+    }
+
+    routes.push(settingsRoute)
 
     return (
         <div className="h-full relative flex bg-zinc-50 dark:bg-zinc-950">

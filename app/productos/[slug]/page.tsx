@@ -105,6 +105,17 @@ export default async function ProductDetailPage(
                         <Link href="/productos" className="hover:text-accent">
                             Productos
                         </Link>
+                        {product.category.parent && (
+                            <>
+                                <ChevronRight className="h-4 w-4" />
+                                <Link
+                                    href={`/productos?categoria=${product.category.parent.slug}`}
+                                    className="hover:text-accent"
+                                >
+                                    {product.category.parent.name}
+                                </Link>
+                            </>
+                        )}
                         <ChevronRight className="h-4 w-4" />
                         <Link
                             href={`/productos?categoria=${product.category.slug}`}
@@ -152,12 +163,22 @@ export default async function ProductDetailPage(
                     {/* INFO */}
                     <div className="space-y-6">
                         <div>
-                            <Link
-                                href={`/productos?categoria=${product.category.slug}`}
-                                className="text-sm font-bold text-accent uppercase tracking-widest"
-                            >
-                                {product.category.name}
-                            </Link>
+                            <div className="flex flex-col">
+                                {product.category.parent && (
+                                    <Link
+                                        href={`/productos?categoria=${product.category.parent.slug}`}
+                                        className="text-xs font-bold text-zinc-500 uppercase tracking-widest hover:text-accent transition-colors"
+                                    >
+                                        {product.category.parent.name}
+                                    </Link>
+                                )}
+                                <Link
+                                    href={`/productos?categoria=${product.category.slug}`}
+                                    className="text-sm font-bold text-accent uppercase tracking-widest"
+                                >
+                                    {product.category.name}
+                                </Link>
+                            </div>
                             <h1 className="text-3xl md:text-4xl font-bold mt-2">
                                 {product.name}
                             </h1>
@@ -177,8 +198,8 @@ export default async function ProductDetailPage(
                         <div className="flex items-center gap-2">
                             <Package
                                 className={`h-5 w-5 ${product.stock > 0
-                                        ? "text-green-500"
-                                        : "text-red-500"
+                                    ? "text-green-500"
+                                    : "text-red-500"
                                     }`}
                             />
                             <span className="font-medium">
@@ -227,24 +248,29 @@ export default async function ProductDetailPage(
                    RELATED PRODUCTS
                 ========================= */}
                 {relatedProducts.length > 0 && (
-                    <div className="space-y-8">
-                        <h2 className="text-center text-3xl font-bold">
-                            Productos Relacionados
-                        </h2>
+                    <div className="space-y-12">
+                        <div className="flex items-center gap-4">
+                            <div className="h-px flex-1 bg-zinc-200 dark:bg-zinc-800" />
+                            <h2 className="text-2xl font-bold text-primary dark:text-white uppercase tracking-widest">
+                                Productos Relacionados
+                            </h2>
+                            <div className="h-px flex-1 bg-zinc-200 dark:bg-zinc-800" />
+                        </div>
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                            {relatedProducts.map(product => (
+                            {relatedProducts.map(rp => (
                                 <ProductCard
-                                    key={product.id}
-                                    id={product.id}
-                                    slug={product.slug}
-                                    name={product.name}
-                                    price={product.price}
-                                    discountPrice={product.discountPrice}
-                                    imageUrl={product.imageUrl}
-                                    isOffer={product.isOffer}
-                                    category={product.category.name}
-                                    stock={product.stock}
+                                    key={rp.id}
+                                    id={rp.id}
+                                    slug={rp.slug}
+                                    name={rp.name}
+                                    price={rp.price}
+                                    discountPrice={rp.discountPrice}
+                                    imageUrl={rp.imageUrl}
+                                    isOffer={rp.isOffer}
+                                    category={rp.category?.parent?.name || rp.category?.name}
+                                    subcategory={rp.category?.parent ? rp.category?.name : undefined}
+                                    stock={rp.stock}
                                 />
                             ))}
                         </div>

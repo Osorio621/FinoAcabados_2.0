@@ -65,6 +65,7 @@ model PasswordResetToken {
 }
 
 enum Role {
+  SUPER_ADMIN
   ADMIN
   CUSTOMER
 }

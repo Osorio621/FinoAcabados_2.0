@@ -17,7 +17,8 @@ import { InventoryList } from "./_components/inventory-list"
 export default async function InventoryPage() {
     const session = await auth()
 
-    if (session?.user?.role !== "ADMIN") {
+    // @ts-ignore
+    if (session?.user?.role !== "ADMIN" && session?.user?.role !== "SUPER_ADMIN") {
         return redirect("/")
     }
 

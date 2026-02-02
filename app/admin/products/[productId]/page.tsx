@@ -15,7 +15,8 @@ export default async function EditProductPage({ params }: EditProductPageProps) 
     const session = await auth()
     const { productId } = await params
 
-    if (session?.user?.role !== "ADMIN") {
+    // @ts-ignore
+    if (session?.user?.role !== "ADMIN" && session?.user?.role !== "SUPER_ADMIN") {
         return redirect("/")
     }
 

@@ -13,7 +13,11 @@ export async function getProducts() {
                 isActive: true
             },
             include: {
-                category: true
+                category: {
+                    include: {
+                        parent: true
+                    }
+                }
             },
             orderBy: {
                 createdAt: "desc"
@@ -37,7 +41,11 @@ export async function getProductBySlug(slug: string) {
                 isActive: true
             },
             include: {
-                category: true
+                category: {
+                    include: {
+                        parent: true
+                    }
+                }
             }
         })
 
@@ -97,7 +105,11 @@ export async function getProductsByCategory(categorySlug: string) {
                 isActive: true
             },
             include: {
-                category: true
+                category: {
+                    include: {
+                        parent: true
+                    }
+                }
             },
             orderBy: {
                 createdAt: "desc"
@@ -124,7 +136,11 @@ export async function getOfferProducts() {
                 }
             },
             include: {
-                category: true
+                category: {
+                    include: {
+                        parent: true
+                    }
+                }
             },
             orderBy: {
                 createdAt: "desc"
@@ -142,10 +158,46 @@ export async function getOfferProducts() {
  */
 export async function getRelatedProducts(productId: string, categoryId: string, limit: number = 4) {
     try {
+        // 1. Obtener información de la categoría actual para saber si tiene padre o hijos
+        const currentCategory = await db.category.findUnique({
+            where: { id: categoryId },
+            include: { children: true }
+        })
+
+        if (!currentCategory) {
+            return { success: false, error: "Categoría no encontrada" }
+        }
+
+        // 2. Determinar todos los IDs de categorías relacionados
+        const relatedCategoryIds = new Set<string>()
+
+        // Agregar la categoría actual
+        relatedCategoryIds.add(categoryId)
+
+        // Si es una subcategoría (tiene padre), agregar al padre y a TODOS sus hermanos
+        if (currentCategory.parentId) {
+            relatedCategoryIds.add(currentCategory.parentId)
+
+            // Buscar hermanos
+            const siblings = await db.category.findMany({
+                where: { parentId: currentCategory.parentId },
+                select: { id: true }
+            })
+            siblings.forEach(s => relatedCategoryIds.add(s.id))
+        }
+
+        // Si tiene hijos, agregarlos todos (para que si el padre es seleccionado, vea productos de los hijos)
+        if (currentCategory.children && currentCategory.children.length > 0) {
+            currentCategory.children.forEach(child => relatedCategoryIds.add(child.id))
+        }
+
+        // 3. Buscar productos en cualquiera de esas categorías
         const products = await db.product.findMany({
             where: {
                 isActive: true,
-                categoryId,
+                categoryId: {
+                    in: Array.from(relatedCategoryIds)
+                },
                 id: {
                     not: productId
                 },
@@ -154,7 +206,11 @@ export async function getRelatedProducts(productId: string, categoryId: string, 
                 }
             },
             include: {
-                category: true
+                category: {
+                    include: {
+                        parent: true
+                    }
+                }
             },
             take: limit,
             orderBy: {
@@ -185,7 +241,11 @@ export async function getFeaturedProducts(limit: number = 8) {
                 }
             },
             include: {
-                category: true
+                category: {
+                    include: {
+                        parent: true
+                    }
+                }
             },
             take: limit,
             orderBy: {
@@ -207,7 +267,11 @@ export async function getFeaturedProducts(limit: number = 8) {
                     }
                 },
                 include: {
-                    category: true
+                    category: {
+                        include: {
+                            parent: true
+                        }
+                    }
                 },
                 take: remaining,
                 orderBy: {

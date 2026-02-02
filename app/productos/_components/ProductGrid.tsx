@@ -17,6 +17,11 @@ interface Product {
         id: string
         name: string
         slug: string
+        parent?: {
+            id: string
+            name: string
+            slug: string
+        } | null
     }
 }
 
@@ -64,7 +69,8 @@ export const ProductGrid = ({ products }: ProductGridProps) => {
                         discountPrice={product.discountPrice}
                         imageUrl={product.imageUrl}
                         isOffer={product.isOffer}
-                        category={product.category.name}
+                        category={product.category.parent ? `${product.category.parent.name}` : product.category.name}
+                        subcategory={product.category.parent ? product.category.name : undefined}
                         stock={product.stock}
                     />
                 </motion.div>

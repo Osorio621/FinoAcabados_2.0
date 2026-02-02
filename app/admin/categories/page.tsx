@@ -6,7 +6,8 @@ import { CategoryManager } from "./_components/category-manager"
 export default async function CategoriesPage() {
     const session = await auth()
 
-    if (session?.user?.role !== "ADMIN") {
+    // @ts-ignore
+    if (session?.user?.role !== "ADMIN" && session?.user?.role !== "SUPER_ADMIN") {
         return redirect("/")
     }
 
@@ -31,7 +32,7 @@ export default async function CategoriesPage() {
                 <p className="text-zinc-500 mt-1">Organiza tus productos en categorías y subcategorías.</p>
             </div>
 
-            <CategoryManager 
+            <CategoryManager
                 initialCategories={categories}
                 mainCategories={mainCategories}
                 subCategories={subCategories}

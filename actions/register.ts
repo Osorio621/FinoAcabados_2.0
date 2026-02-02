@@ -4,6 +4,7 @@ import * as z from "zod"
 import bcrypt from "bcryptjs"
 import { db } from "@/lib/db"
 import { registerSchema } from "@/schemas"
+import { sendWelcomeEmail } from "@/lib/mail"
 
 export const register = async (values: z.infer<typeof registerSchema>) => {
     const validatedFields = registerSchema.safeParse(values)
@@ -33,6 +34,9 @@ export const register = async (values: z.infer<typeof registerSchema>) => {
                 password: hashedPassword,
             },
         })
+
+        // Enviar correo de bienvenida
+        await sendWelcomeEmail(email, name)
 
         return { success: "Usuario creado exitosamente" }
     } catch (error) {

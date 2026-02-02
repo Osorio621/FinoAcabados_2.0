@@ -306,7 +306,7 @@ export const Navbar = () => {
                                         className="absolute top-full right-0 mt-2 w-48 bg-white border border-zinc-200 shadow-xl rounded-xl z-50"
                                     >
                                         <div className="p-2">
-                                            {session.user?.role === "ADMIN" && (
+                                            {(session.user?.role === "ADMIN" || (session.user as any)?.role === "SUPER_ADMIN") && (
                                                 <Link
                                                     href="/admin"
                                                     onClick={() => setUserMenuOpen(false)}
@@ -442,7 +442,7 @@ export const Navbar = () => {
                                                 </div>
                                             </div>
 
-                                            {session.user?.role === "ADMIN" && (
+                                            {(session.user?.role === "ADMIN" || (session.user as any)?.role === "SUPER_ADMIN") && (
                                                 <Link
                                                     href="/admin"
                                                     onClick={() => setIsOpen(false)}
