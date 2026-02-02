@@ -1,9 +1,21 @@
+"use client"
+
 import Link from "next/link"
 import { Facebook, Instagram, Twitter, Mail, MapPin, Phone } from "lucide-react"
+import { useSidebar } from "@/lib/context/sidebar-context"
+import { usePathname } from "next/navigation"
+import { cn } from "@/lib/utils"
 
 export const Footer = () => {
+    const { isSidebarOpen } = useSidebar()
+    const pathname = usePathname()
+    const isAdmin = pathname?.startsWith("/admin") || pathname?.startsWith("/auth/admin")
+
     return (
-        <footer className="bg-primary text-white pt-16 pb-8 px-6">
+        <footer className={cn(
+            "bg-primary text-white pt-16 pb-8 px-6 transition-all duration-300",
+            isAdmin && (isSidebarOpen ? "md:pl-72" : "md:pl-20")
+        )}>
             <div className="mx-auto max-w-7xl grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
                 {/* Brand */}
                 <div className="space-y-4">

@@ -58,15 +58,19 @@ export async function getCategories() {
     try {
         const categories = await db.category.findMany({
             where: {
-                products: {
-                    some: {
-                        isActive: true
-                    }
-                }
+                parentId: null
             },
             include: {
                 _count: {
                     select: { products: { where: { isActive: true } } }
+                },
+                children: {
+                    include: {
+                        _count: {
+                            select: { products: { where: { isActive: true } } }
+                        }
+                    },
+                    orderBy: { name: 'asc' }
                 }
             },
             orderBy: {

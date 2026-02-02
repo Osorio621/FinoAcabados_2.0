@@ -16,6 +16,7 @@ interface Category {
     _count: {
         products: number
     }
+    children?: Category[]
 }
 
 interface Product {
@@ -90,28 +91,10 @@ function ProductsContent({ initialProducts, categories }: ProductsClientProps) {
         }
     }, [searchParams, categories, searchQuery])
 
-    // Función para manejar cambio de categorías y actualizar URL
+    // Función para manejar cambio de categorías
     const handleCategoryChange = (categoryIds: string[]) => {
         setSelectedCategories(categoryIds)
         setCurrentPage(1)
-
-        // Actualizar URL si hay cambios en las categorías
-        if (categoryIds.length === 1) {
-            // Si hay exactamente una categoría seleccionada, actualizar URL
-            const selectedCategory = categories.find(cat => cat.id === categoryIds[0])
-            if (selectedCategory) {
-                router.push(`/productos?categoria=${selectedCategory.slug}`)
-            }
-        } else if (categoryIds.length === 0) {
-            // Si no hay categorías seleccionadas, quitar parámetro de categoría
-            router.push("/productos")
-        } else {
-            // Si hay múltiples categorías, mantener solo la primera en la URL
-            const firstCategory = categories.find(cat => cat.id === categoryIds[0])
-            if (firstCategory) {
-                router.push(`/productos?categoria=${firstCategory.slug}`)
-            }
-        }
     }
 
     // Función para limpiar todos los filtros incluyendo URL
@@ -122,7 +105,7 @@ function ProductsContent({ initialProducts, categories }: ProductsClientProps) {
         setShowInStockOnly(false)
         setPriceRange([minProductPrice, maxProductPrice])
         setCurrentPage(1)
-        router.push("/productos") // Limpiar parámetros de la URL
+        router.replace("/productos", { scroll: false }) // Limpiar parámetros de la URL sin hacer scroll
     }
 
     // Apply filters and sorting

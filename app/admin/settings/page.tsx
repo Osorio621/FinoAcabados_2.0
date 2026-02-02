@@ -1,6 +1,7 @@
 import { auth } from "@/lib/auth"
 import { redirect } from "next/navigation"
-import { Settings, User, Bell, Shield } from "lucide-react"
+import { Settings, Bell, Shield } from "lucide-react"
+import { ProfileForm } from "./_components/profile-form"
 
 export default async function SettingsPage() {
     const session = await auth()
@@ -17,35 +18,8 @@ export default async function SettingsPage() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {/* Perfil */}
-                <div className="bg-white dark:bg-zinc-900 rounded-3xl border border-zinc-200 dark:border-zinc-800 p-8 shadow-sm">
-                    <div className="flex items-center gap-4 mb-6">
-                        <div className="w-12 h-12 bg-zinc-100 dark:bg-zinc-800 rounded-2xl flex items-center justify-center">
-                            <User className="h-6 w-6 text-primary dark:text-white" />
-                        </div>
-                        <div>
-                            <h2 className="text-xl font-bold text-primary dark:text-white">Perfil de Administrador</h2>
-                            <p className="text-sm text-zinc-500">Información de tu cuenta actual</p>
-                        </div>
-                    </div>
-
-                    <div className="space-y-4">
-                        <div className="p-4 bg-zinc-50 dark:bg-zinc-950 rounded-2xl border border-zinc-100 dark:border-zinc-800">
-                            <p className="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1">Nombre</p>
-                            <p className="text-primary dark:text-white font-medium">{session?.user?.name || "Sin Nombre"}</p>
-                        </div>
-                        <div className="p-4 bg-zinc-50 dark:bg-zinc-950 rounded-2xl border border-zinc-100 dark:border-zinc-800">
-                            <p className="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1">Email</p>
-                            <p className="text-primary dark:text-white font-medium">{session?.user?.email}</p>
-                        </div>
-                        <div className="p-4 bg-zinc-50 dark:bg-zinc-950 rounded-2xl border border-zinc-100 dark:border-zinc-800">
-                            <p className="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1">Rol</p>
-                            <p className="text-emerald-500 font-bold bg-emerald-500/10 px-2 py-1 rounded w-fit text-sm">
-                                {session?.user?.role}
-                            </p>
-                        </div>
-                    </div>
-                </div>
+                {/* Perfil Editable */}
+                <ProfileForm user={session.user} />
 
                 {/* General Settings Placeholder */}
                 <div className="space-y-6">

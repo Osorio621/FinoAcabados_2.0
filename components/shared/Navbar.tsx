@@ -73,12 +73,19 @@ const navCategories = [
     }
 ]
 
+import { useSidebar } from "@/lib/context/sidebar-context"
+import { usePathname } from "next/navigation"
+
 export const Navbar = () => {
     const { data: session } = useSession()
+    const { isSidebarOpen } = useSidebar()
+    const pathname = usePathname()
     const [scrolled, setScrolled] = useState(false)
     const [isOpen, setIsOpen] = useState(false)
     const [userMenuOpen, setUserMenuOpen] = useState(false)
     const router = useRouter()
+
+    const isAdmin = pathname?.startsWith("/admin") || pathname?.startsWith("/auth/admin")
 
     // Función para navegar a productos con categoría
     const handleProductCategoryClick = (categorySlug: string) => {
@@ -102,8 +109,9 @@ export const Navbar = () => {
         <nav
             className={cn(
                 "fixed top-0 z-50 w-full transition-all duration-300 px-6 py-4",
-                scrolled ? "bg-white/95 backdrop-blur border-b border-zinc-200 text-zinc-900"
-                    : "bg-transparent text-white"
+                scrolled ? "bg-white/95 backdrop-blur shadow-sm border-b border-zinc-200 text-zinc-900"
+                    : "bg-transparent text-white",
+                isAdmin && (isSidebarOpen ? "md:pl-[312px]" : "md:pl-24") // 72px + 24px padding or 20px + 24px padding
             )}
         >
             <div className="mx-auto flex max-w-7xl items-center justify-between relative">
@@ -166,7 +174,7 @@ export const Navbar = () => {
                                         href={cat.href}
                                         className={cn(
                                             "flex items-center gap-1 text-sm font-medium transition-colors hover:text-accent",
-                                            scrolled ? "text-muted-foreground" : "text-zinc-300"
+                                            scrolled ? "text-zinc-900" : "text-zinc-300"
                                         )}
                                     >
                                         {cat.title}
@@ -176,26 +184,26 @@ export const Navbar = () => {
                                 {/* Dropdown para Productos */}
                                 {cat.title === "Productos" && hasItems && (
                                     <div className="invisible absolute top-full left-0 w-64 pt-4 opacity-0 group-hover:visible group-hover:opacity-100 transition-all z-50">
-                                        <div className="bg-white dark:bg-zinc-900 shadow-xl rounded-xl border border-zinc-100 dark:border-zinc-800 p-4">
+                                        <div className="bg-white shadow-xl rounded-xl border border-zinc-200 p-4">
                                             <ul className="space-y-2">
-                                                {/* Opción para ver todos los productos */}
+                                                {/* Ver todos */}
                                                 <li>
                                                     <button
                                                         onClick={handleAllProductsClick}
-                                                        className="block w-full text-left text-sm text-muted-foreground hover:text-accent transition-colors font-medium mb-2 pb-2 border-b border-zinc-100"
+                                                        className="block w-full text-left text-sm text-zinc-800 hover:text-accent transition-colors font-medium mb-2 pb-2 border-b border-zinc-100"
                                                     >
                                                         Ver todos los productos
                                                     </button>
                                                 </li>
 
-                                                {/* Categorías específicas */}
+                                                {/* Categorías */}
                                                 {cat.items.map((item) => {
                                                     if (isProductCategory(item)) {
                                                         return (
                                                             <li key={item.slug}>
                                                                 <button
                                                                     onClick={() => handleProductCategoryClick(item.slug)}
-                                                                    className="block w-full text-left text-sm text-muted-foreground hover:text-accent transition-colors"
+                                                                    className="block w-full text-left text-sm text-zinc-700 hover:text-accent transition-colors"
                                                                 >
                                                                     {item.name}
                                                                 </button>
@@ -209,6 +217,7 @@ export const Navbar = () => {
                                     </div>
                                 )}
 
+
                                 {/* Dropdown para otros menús */}
                                 {cat.title !== "Productos" && hasItems && (
                                     <div className="invisible absolute top-full left-0 w-64 pt-4 opacity-0 group-hover:visible group-hover:opacity-100 transition-all z-50">
@@ -220,7 +229,7 @@ export const Navbar = () => {
                                                             <li key={item.href}>
                                                                 <Link
                                                                     href={item.href}
-                                                                    className="block text-sm text-muted-foreground hover:text-accent transition-colors"
+                                                                    className="block text-sm text-zinc-600 dark:text-zinc-300 hover:text-accent dark:hover:text-accent transition-colors"
                                                                 >
                                                                     {item.name}
                                                                 </Link>
@@ -242,7 +251,7 @@ export const Navbar = () => {
                 <div className="flex items-center gap-5">
                     <button
                         onClick={() => router.push("/productos")}
-                        className={cn("h-5 w-5 cursor-pointer", scrolled ? "text-muted-foreground" : "text-white")}
+                        className={cn("h-5 w-5 cursor-pointer", scrolled ? "text-zinc-900" : "text-white")}
                     >
                         <Search className="h-5 w-5" />
                     </button>
@@ -257,7 +266,7 @@ export const Navbar = () => {
                         }}
                         className="relative cursor-pointer"
                     >
-                        <ShoppingCart className={cn("h-5 w-5", scrolled ? "text-muted-foreground" : "text-white")} />
+                        <ShoppingCart className={cn("h-5 w-5", scrolled ? "text-zinc-900" : "text-white")} />
                         <span className="absolute -top-2 -right-2 bg-accent text-white text-[10px] h-4 w-4 rounded-full flex items-center justify-center">0</span>
                     </div>
 

@@ -18,9 +18,14 @@ import Link from "next/link"
 import { productSchema } from "@/schemas"
 import { createProduct, updateProduct } from "@/actions/admin-actions"
 
+interface Category {
+    id: string
+    name: string
+    parentId?: string | null
+}
 interface ProductFormProps {
     initialData?: any
-    categories: any[]
+    categories: Category[]
 }
 
 export function ProductForm({ initialData, categories }: ProductFormProps) {
@@ -77,6 +82,23 @@ export function ProductForm({ initialData, categories }: ProductFormProps) {
             discountPrice: ""
         }
     })
+
+    const currentCategory = categories.find((c: Category) => c.id === initialData?.categoryId)
+    const [selectedParentId, setSelectedParentId] = useState<string>(
+        currentCategory?.parentId || (currentCategory ? currentCategory.id : "")
+    )
+    const parentCategories = categories.filter((c: Category) => !c.parentId)
+    const subCategories = categories.filter((c: Category) => c.parentId === selectedParentId)
+    const handleParentCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const newParentId = e.target.value
+        setSelectedParentId(newParentId)
+        const hasSub = categories.some((c: Category) => c.parentId === newParentId)
+        if (hasSub) {
+            form.setValue("categoryId", "")
+        } else {
+            form.setValue("categoryId", newParentId)
+        }
+    }
 
     const onSubmit = (values: z.infer<typeof productSchema>) => {
         setError("")
@@ -215,20 +237,47 @@ export function ProductForm({ initialData, categories }: ProductFormProps) {
                 {/* Sidebar del Formulario */}
                 <div className="space-y-6">
                     <div className="bg-white dark:bg-zinc-900 p-8 rounded-3xl border border-zinc-200 dark:border-zinc-800 shadow-sm space-y-6">
+                        {/* Selección de Categoría Principal */}
                         <div className="space-y-2">
-                            <label className="text-xs font-bold uppercase tracking-wider text-zinc-400 pl-1">Categoría</label>
+                            <label className="text-xs font-bold uppercase tracking-wider text-zinc-400 pl-1">Categoría Principal</label>
                             <select
-                                {...form.register("categoryId")}
+                                value={selectedParentId}
+                                onChange={handleParentCategoryChange}
                                 disabled={isPending}
                                 className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl py-3 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-accent/20 transition-all disabled:opacity-50 appearance-none cursor-pointer"
                             >
                                 <option value="">Seleccionar categoría</option>
-                                {categories.map((cat) => (
+                                {parentCategories.map((cat) => (
                                     <option key={cat.id} value={cat.id}>{cat.name}</option>
                                 ))}
                             </select>
-                            {form.formState.errors.categoryId && <p className="text-rose-500 text-[10px] font-bold uppercase mt-1 pl-1">{form.formState.errors.categoryId.message}</p>}
                         </div>
+
+                        {/* Selección de Subcategoría (Condicional) */}
+                        {subCategories.length > 0 && (
+                            <div className="space-y-2 animate-in fade-in slide-in-from-top-2">
+                                <label className="text-xs font-bold uppercase tracking-wider text-zinc-400 pl-1">Subcategoría</label>
+                                <select
+                                    {...form.register("categoryId")}
+                                    disabled={isPending}
+                                    className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl py-3 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-accent/20 transition-all disabled:opacity-50 appearance-none cursor-pointer"
+                                >
+                                    <option value="">Seleccionar subcategoría</option>
+                                    {subCategories.map((cat) => (
+                                        <option key={cat.id} value={cat.id}>{cat.name}</option>
+                                    ))}
+                                </select>
+                                {form.formState.errors.categoryId && <p className="text-rose-500 text-[10px] font-bold uppercase mt-1 pl-1">{form.formState.errors.categoryId.message}</p>}
+                            </div>
+                        )}
+                        
+                        {/* Campo oculto para validación cuando no hay subcategorías */}
+                        {subCategories.length === 0 && (
+                            <input type="hidden" {...form.register("categoryId")} />
+                        )}
+                        {subCategories.length === 0 && form.formState.errors.categoryId && (
+                             <p className="text-rose-500 text-[10px] font-bold uppercase mt-1 pl-1">{form.formState.errors.categoryId.message}</p>
+                        )}
 
                         <div className="space-y-4">
                             <div>

@@ -133,12 +133,23 @@ export async function updateProductOffer(id: string, isOffer: boolean, discountP
    CATEGORY ACTIONS
    ========================================== */
 
-export async function createCategory(values: { name: string, slug: string }) {
+export async function createCategory(values: { 
+    name: string, 
+    slug: string, 
+    parentId?: string | null  // ← Cambiado a aceptar null
+}) {
     try {
         await checkAdmin()
 
         const category = await db.category.create({
-            data: { ...values }
+            data: { 
+                name: values.name, 
+                slug: values.slug,
+                parentId: values.parentId || null
+            },
+            include: {
+                parent: true  // ← Agregado para incluir la relación
+            }
         })
 
         revalidatePath("/admin/categories")
@@ -152,13 +163,29 @@ export async function createCategory(values: { name: string, slug: string }) {
     }
 }
 
-export async function updateCategory(id: string, values: { name: string, slug: string }) {
+export async function updateCategory(id: string, values: { 
+    name: string, 
+    slug: string, 
+    parentId?: string | null  // ← Cambiado a aceptar null
+}) {
     try {
         await checkAdmin()
+        
+        // Evitar que una categoría sea su propio padre
+        if (values.parentId === id) {
+             return { error: "Una categoría no puede ser su propio padre" }
+        }
 
         const category = await db.category.update({
             where: { id },
-            data: { ...values }
+            data: { 
+                name: values.name, 
+                slug: values.slug,
+                parentId: values.parentId || null
+            },
+            include: {
+                parent: true  // ← Agregado para incluir la relación
+            }
         })
 
         revalidatePath("/admin/categories")
@@ -172,13 +199,22 @@ export async function deleteCategory(id: string) {
     try {
         await checkAdmin()
 
-        // Comprobar si tiene productos primero para dar un error amigable
+        // Comprobar si tiene productos
         const productsCount = await db.product.count({
             where: { categoryId: id }
         })
 
         if (productsCount > 0) {
             return { error: "No se puede eliminar la categoría porque tiene productos asociados" }
+        }
+
+        // Comprobar si tiene subcategorías
+        const childrenCount = await db.category.count({
+            where: { parentId: id }
+        })
+
+        if (childrenCount > 0) {
+            return { error: "No se puede eliminar la categoría porque tiene subcategorías asociadas" }
         }
 
         await db.category.delete({

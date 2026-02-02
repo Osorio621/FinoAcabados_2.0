@@ -12,6 +12,7 @@ interface Category {
     _count: {
         products: number
     }
+    children?: Category[]
 }
 
 interface ProductFiltersProps {
@@ -86,23 +87,53 @@ export const ProductFilters = ({
                 </h4>
                 <div className="space-y-3">
                     {categories.map((category) => (
-                        <label
-                            key={category.id}
-                            className="flex items-center gap-3 cursor-pointer group"
-                        >
-                            <input
-                                type="checkbox"
-                                checked={selectedCategories.includes(category.id)}
-                                onChange={() => handleCategoryToggle(category.id)}
-                                className="w-4 h-4 rounded border-zinc-300 dark:border-zinc-700 text-accent focus:ring-accent focus:ring-offset-0"
-                            />
-                            <span className="text-sm text-zinc-700 dark:text-zinc-300 group-hover:text-accent transition-colors flex-1">
-                                {category.name}
-                            </span>
-                            <span className="text-xs text-zinc-400">
-                                ({category._count.products})
-                            </span>
-                        </label>
+                        <div key={category.id} className="space-y-2">
+                            <label
+                                className="flex items-center gap-3 cursor-pointer group"
+                            >
+                                <input
+                                    type="checkbox"
+                                    checked={selectedCategories.includes(category.id)}
+                                    onChange={() => handleCategoryToggle(category.id)}
+                                    className="w-4 h-4 rounded border-zinc-300 dark:border-zinc-700 text-accent focus:ring-accent focus:ring-offset-0"
+                                />
+                                <span className="text-sm text-zinc-700 dark:text-zinc-300 group-hover:text-accent transition-colors flex-1 font-medium">
+                                    {category.name}
+                                </span>
+                                {category._count.products > 0 && (
+                                    <span className="text-xs text-zinc-400">
+                                        ({category._count.products})
+                                    </span>
+                                )}
+                            </label>
+
+                            {/* Subcategorías */}
+                            {category.children && category.children.length > 0 && (
+                                <div className="ml-6 space-y-2 border-l-2 border-zinc-100 dark:border-zinc-800 pl-3">
+                                    {category.children.map((child: Category) => (
+                                        <label
+                                            key={child.id}
+                                            className="flex items-center gap-3 cursor-pointer group"
+                                        >
+                                            <input
+                                                type="checkbox"
+                                                checked={selectedCategories.includes(child.id)}
+                                                onChange={() => handleCategoryToggle(child.id)}
+                                                className="w-3.5 h-3.5 rounded border-zinc-300 dark:border-zinc-700 text-accent focus:ring-accent focus:ring-offset-0"
+                                            />
+                                            <span className="text-sm text-zinc-600 dark:text-zinc-400 group-hover:text-accent transition-colors flex-1">
+                                                {child.name}
+                                            </span>
+                                            {child._count.products > 0 && (
+                                                <span className="text-xs text-zinc-400">
+                                                    ({child._count.products})
+                                                </span>
+                                            )}
+                                        </label>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
                     ))}
                 </div>
             </div>

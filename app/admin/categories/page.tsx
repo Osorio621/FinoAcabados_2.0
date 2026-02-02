@@ -13,17 +13,29 @@ export default async function CategoriesPage() {
     const categories = await db.category.findMany({
         orderBy: {
             name: "asc"
+        },
+        include: {
+            parent: true,
+            children: true // Agregamos esto para saber si tiene subcategorías
         }
     })
+
+    // Separamos categorías principales y subcategorías
+    const mainCategories = categories.filter(category => !category.parentId)
+    const subCategories = categories.filter(category => category.parentId)
 
     return (
         <div className="space-y-8">
             <div>
                 <h1 className="text-3xl font-bold tracking-tight text-primary dark:text-white">Categorías</h1>
-                <p className="text-zinc-500 mt-1">Organiza tus productos en categorías para que sea más fácil encontrarlos.</p>
+                <p className="text-zinc-500 mt-1">Organiza tus productos en categorías y subcategorías.</p>
             </div>
 
-            <CategoryManager initialCategories={categories} />
+            <CategoryManager 
+                initialCategories={categories}
+                mainCategories={mainCategories}
+                subCategories={subCategories}
+            />
         </div>
     )
 }
