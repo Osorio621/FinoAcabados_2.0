@@ -27,7 +27,7 @@ export default function ContactoPage() {
                 >
                     <span className="text-accent font-semibold tracking-widest uppercase text-xs">Atención Personalizada</span>
                     <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight text-zinc-900 dark:text-white">
-                        Hablemos de tu <span className="text-primary italic">próximo proyecto</span>
+                        Hablemos de tu <span className="bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent italic">próximo proyecto</span>
                     </h1>
                     <p className="text-zinc-500 dark:text-zinc-400 max-w-2xl mx-auto text-lg leading-relaxed">
                         En **Fino Acabados** estamos listos para asesorarte con soluciones profesionales.

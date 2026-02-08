@@ -215,7 +215,7 @@ export default async function ProductDetailPage(
 
                         <AddToCartButton
                             stock={product.stock}
-                            slug={product.slug}
+                            productId={product.id}
                             name={product.name}
                         />
 

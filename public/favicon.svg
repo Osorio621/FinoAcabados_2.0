@@ -1,0 +1,5 @@
+<!-- public/favicon.svg -->
+<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+  <rect width="32" height="32" rx="8" fill="#0f172a"/>
+  <text x="50%" y="50%" text-anchor="middle" dy=".3em" fill="white" font-family="Arial, sans-serif" font-weight="bold" font-style="italic" font-size="14">FA</text>
+</svg>

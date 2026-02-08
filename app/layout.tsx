@@ -17,6 +17,10 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Fino Acabados | Pinturas, Herramientas y Complementos Premium",
   description: "Tu tienda integral de acabados finos, herramientas profesionales y accesorios de construcción.",
+  icons: {
+    icon: "/favicon.svg",
+    shortcut: "/favicon.svg",
+  },
 };
 
 export default function RootLayout({

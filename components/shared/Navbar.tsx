@@ -74,11 +74,13 @@ const navCategories = [
 ]
 
 import { useSidebar } from "@/lib/context/sidebar-context"
+import { useCart } from "@/lib/context/cart-context"
 import { usePathname } from "next/navigation"
 
 export const Navbar = () => {
     const { data: session } = useSession()
     const { isSidebarOpen } = useSidebar()
+    const { itemCount } = useCart()
     const pathname = usePathname()
     const [scrolled, setScrolled] = useState(false)
     const [isOpen, setIsOpen] = useState(false)
@@ -105,12 +107,38 @@ export const Navbar = () => {
         return () => window.removeEventListener("scroll", handleScroll)
     }, [])
 
+    // Determinar el fondo según el scroll
+    const getNavBackground = () => {
+        if (scrolled) {
+            // Fondo translúcido con blur
+            return "bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md"
+        }
+        return "bg-transparent"
+    }
+
+    // Determinar los colores de texto según el scroll
+    const getTextColor = (isDarkMode: boolean = false) => {
+        if (scrolled) {
+            return "text-zinc-900 dark:text-white"
+        }
+        // Cuando no hay scroll, usamos texto blanco con opacidad
+        return "text-white"
+    }
+
+    // Determinar el color del borde
+    const getBorderColor = () => {
+        if (scrolled) {
+            return "border-b border-zinc-200/50 dark:border-zinc-800/50"
+        }
+        return ""
+    }
+
     return (
         <nav
             className={cn(
-                "fixed top-0 z-50 w-full transition-all duration-300 px-6 py-4",
-                scrolled ? "bg-white/95 backdrop-blur shadow-sm border-b border-zinc-200 text-zinc-900"
-                    : "bg-transparent text-white",
+                "fixed top-0 z-50 w-full transition-all duration-500 px-6 py-4",
+                getNavBackground(),
+                getBorderColor(),
                 isAdmin && (isSidebarOpen ? "md:pl-[312px]" : "md:pl-24") // 72px + 24px padding or 20px + 24px padding
             )}
         >
@@ -130,8 +158,8 @@ export const Navbar = () => {
                     <div className="flex flex-col leading-tight">
                         <span
                             className={cn(
-                                "text-xl font-bold tracking-tight uppercase transition-colors",
-                                scrolled ? "text-zinc-900" : "text-white"
+                                "text-xl font-bold tracking-tight uppercase transition-colors duration-300",
+                                getTextColor()
                             )}
                         >
                             Fino Acabados
@@ -158,14 +186,17 @@ export const Navbar = () => {
                                         <button
                                             onClick={handleAllProductsClick}
                                             className={cn(
-                                                "transition-colors hover:text-accent",
-                                                scrolled ? "text-muted-foreground" : "text-zinc-300"
+                                                "transition-colors duration-300 hover:text-accent",
+                                                getTextColor()
                                             )}
                                         >
                                             {cat.title}
                                         </button>
                                         {hasItems && (
-                                            <ChevronDown className="h-4 w-4 transition-transform group-hover:rotate-180" />
+                                            <ChevronDown className={cn(
+                                                "h-4 w-4 transition-transform duration-300 group-hover:rotate-180",
+                                                getTextColor()
+                                            )} />
                                         )}
                                     </div>
                                 ) : (
@@ -173,8 +204,8 @@ export const Navbar = () => {
                                     <Link
                                         href={cat.href}
                                         className={cn(
-                                            "flex items-center gap-1 text-sm font-medium transition-colors hover:text-accent",
-                                            scrolled ? "text-zinc-900" : "text-zinc-300"
+                                            "flex items-center gap-1 text-sm font-medium transition-colors duration-300 hover:text-accent",
+                                            getTextColor()
                                         )}
                                     >
                                         {cat.title}
@@ -183,14 +214,14 @@ export const Navbar = () => {
 
                                 {/* Dropdown para Productos */}
                                 {cat.title === "Productos" && hasItems && (
-                                    <div className="invisible absolute top-full left-0 w-64 pt-4 opacity-0 group-hover:visible group-hover:opacity-100 transition-all z-50">
-                                        <div className="bg-white shadow-xl rounded-xl border border-zinc-200 p-4">
+                                    <div className="invisible absolute top-full left-0 w-64 pt-4 opacity-0 group-hover:visible group-hover:opacity-100 transition-all duration-300 z-50">
+                                        <div className="bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md shadow-2xl rounded-xl border border-zinc-200/50 dark:border-zinc-800/50 p-4">
                                             <ul className="space-y-2">
                                                 {/* Ver todos */}
                                                 <li>
                                                     <button
                                                         onClick={handleAllProductsClick}
-                                                        className="block w-full text-left text-sm text-zinc-800 hover:text-accent transition-colors font-medium mb-2 pb-2 border-b border-zinc-100"
+                                                        className="block w-full text-left text-sm text-zinc-800 dark:text-zinc-200 hover:text-accent transition-colors font-medium mb-2 pb-2 border-b border-zinc-100/50 dark:border-zinc-800/50"
                                                     >
                                                         Ver todos los productos
                                                     </button>
@@ -203,7 +234,7 @@ export const Navbar = () => {
                                                             <li key={item.slug}>
                                                                 <button
                                                                     onClick={() => handleProductCategoryClick(item.slug)}
-                                                                    className="block w-full text-left text-sm text-zinc-700 hover:text-accent transition-colors"
+                                                                    className="block w-full text-left text-sm text-zinc-700 dark:text-zinc-300 hover:text-accent transition-colors"
                                                                 >
                                                                     {item.name}
                                                                 </button>
@@ -217,11 +248,10 @@ export const Navbar = () => {
                                     </div>
                                 )}
 
-
                                 {/* Dropdown para otros menús */}
                                 {cat.title !== "Productos" && hasItems && (
-                                    <div className="invisible absolute top-full left-0 w-64 pt-4 opacity-0 group-hover:visible group-hover:opacity-100 transition-all z-50">
-                                        <div className="bg-white dark:bg-zinc-900 shadow-xl rounded-xl border border-zinc-100 dark:border-zinc-800 p-4">
+                                    <div className="invisible absolute top-full left-0 w-64 pt-4 opacity-0 group-hover:visible group-hover:opacity-100 transition-all duration-300 z-50">
+                                        <div className="bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md shadow-2xl rounded-xl border border-zinc-200/50 dark:border-zinc-800/50 p-4">
                                             <ul className="space-y-2">
                                                 {cat.items.map((item) => {
                                                     if (isContactCategory(item)) {
@@ -251,7 +281,7 @@ export const Navbar = () => {
                 <div className="flex items-center gap-5">
                     <button
                         onClick={() => router.push("/productos")}
-                        className={cn("h-5 w-5 cursor-pointer", scrolled ? "text-zinc-900" : "text-white")}
+                        className={cn("h-5 w-5 cursor-pointer transition-colors duration-300 hover:text-accent", getTextColor())}
                     >
                         <Search className="h-5 w-5" />
                     </button>
@@ -259,26 +289,33 @@ export const Navbar = () => {
                     <div
                         onClick={() => {
                             if (!session) {
-                                window.location.href = "/auth/login"
+                                router.push("/auth/login")
                             } else {
-                                window.location.href = "/cart"
+                                router.push("/carrito")
                             }
                         }}
-                        className="relative cursor-pointer"
+                        className="relative cursor-pointer group"
                     >
-                        <ShoppingCart className={cn("h-5 w-5", scrolled ? "text-zinc-900" : "text-white")} />
-                        <span className="absolute -top-2 -right-2 bg-accent text-white text-[10px] h-4 w-4 rounded-full flex items-center justify-center">0</span>
+                        <ShoppingCart className={cn(
+                            "h-5 w-5 transition-colors duration-300 group-hover:text-accent",
+                            getTextColor()
+                        )} />
+                        {itemCount > 0 && (
+                            <span className="absolute -top-2 -right-2 bg-accent text-white text-[10px] h-4 w-4 rounded-full flex items-center justify-center font-bold">
+                                {itemCount}
+                            </span>
+                        )}
                     </div>
 
                     {/* Botón hamburguesa */}
                     <button
-                        className="lg:hidden"
+                        className="lg:hidden transition-colors duration-300 hover:text-accent"
                         onClick={() => setIsOpen(!isOpen)}
                     >
                         {isOpen ? (
-                            <X className={scrolled ? "text-zinc-900" : "text-white"} />
+                            <X className={getTextColor()} />
                         ) : (
-                            <Menu className={scrolled ? "text-zinc-900" : "text-white"} />
+                            <Menu className={getTextColor()} />
                         )}
                     </button>
 
@@ -287,7 +324,7 @@ export const Navbar = () => {
                         <div className="hidden lg:block relative">
                             <button
                                 onClick={() => setUserMenuOpen(!userMenuOpen)}
-                                className="flex items-center gap-2 bg-accent/20 border border-accent/30 text-accent px-3 py-1.5 rounded-full hover:bg-accent hover:text-primary transition-all"
+                                className="flex items-center gap-2 bg-accent/20 border border-accent/30 text-accent px-3 py-1.5 rounded-full hover:bg-accent hover:text-white transition-all duration-300 shadow-sm"
                             >
                                 <User className="h-4 w-4" />
                                 <span className="text-sm font-bold">
@@ -303,14 +340,14 @@ export const Navbar = () => {
                                         animate={{ opacity: 1, y: 0 }}
                                         exit={{ opacity: 0, y: -10 }}
                                         transition={{ duration: 0.2 }}
-                                        className="absolute top-full right-0 mt-2 w-48 bg-white border border-zinc-200 shadow-xl rounded-xl z-50"
+                                        className="absolute top-full right-0 mt-2 w-48 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md border border-zinc-200/50 dark:border-zinc-800/50 shadow-2xl rounded-xl z-50"
                                     >
                                         <div className="p-2">
                                             {(session.user?.role === "ADMIN" || (session.user as any)?.role === "SUPER_ADMIN") && (
                                                 <Link
                                                     href="/admin"
                                                     onClick={() => setUserMenuOpen(false)}
-                                                    className="flex items-center gap-2 px-3 py-2 text-sm text-zinc-700 hover:bg-zinc-100 rounded-lg"
+                                                    className="flex items-center gap-2 px-3 py-2 text-sm text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100/50 dark:hover:bg-zinc-800/50 rounded-lg transition-colors"
                                                 >
                                                     <LayoutDashboard className="h-4 w-4" />
                                                     Panel Administrador
@@ -321,7 +358,7 @@ export const Navbar = () => {
                                                     setUserMenuOpen(false)
                                                     signOut({ callbackUrl: "/auth/login" })
                                                 }}
-                                                className="flex items-center gap-2 w-full px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg"
+                                                className="flex items-center gap-2 w-full px-3 py-2 text-sm text-red-600 hover:bg-red-50/50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
                                             >
                                                 <LogOut className="h-4 w-4" />
                                                 Cerrar sesión
@@ -334,7 +371,7 @@ export const Navbar = () => {
                     ) : (
                         <Link
                             href="/auth/login"
-                            className="hidden lg:flex bg-primary text-white px-4 py-2 rounded-full font-bold hover:bg-primary/90 transition-colors"
+                            className="hidden lg:flex bg-primary text-white px-4 py-2 rounded-full font-bold hover:bg-primary/90 transition-colors duration-300 shadow-sm"
                         >
                             Ingresar
                         </Link>
@@ -349,16 +386,16 @@ export const Navbar = () => {
                             animate={{ opacity: 1, y: 0, height: "auto" }}
                             exit={{ opacity: 0, y: -20, height: 0 }}
                             transition={{ duration: 0.3 }}
-                            className="lg:hidden absolute top-full left-0 right-0 mt-4 bg-white border border-zinc-200 shadow-2xl rounded-2xl z-40 overflow-hidden"
+                            className="lg:hidden absolute top-full left-0 right-0 mt-4 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md border border-zinc-200/50 dark:border-zinc-800/50 shadow-2xl rounded-2xl z-40 overflow-hidden"
                         >
                             <div className="flex flex-col p-6 space-y-4">
                                 {navCategories.map((cat) => (
-                                    <div key={cat.title} className="border-b border-zinc-100 pb-4 last:border-0">
+                                    <div key={cat.title} className="border-b border-zinc-100/50 dark:border-zinc-800/50 pb-4 last:border-0">
                                         {cat.title === "Productos" ? (
                                             <>
                                                 <button
                                                     onClick={handleAllProductsClick}
-                                                    className="text-zinc-900 text-lg font-semibold block mb-2 hover:text-accent transition-colors w-full text-left"
+                                                    className="text-zinc-900 dark:text-white text-lg font-semibold block mb-2 hover:text-accent transition-colors w-full text-left"
                                                 >
                                                     {cat.title}
                                                 </button>
@@ -369,7 +406,7 @@ export const Navbar = () => {
                                                         {/* Opción para ver todos */}
                                                         <button
                                                             onClick={handleAllProductsClick}
-                                                            className="text-zinc-600 text-sm block py-1 hover:text-accent transition-colors w-full text-left font-medium mb-2 pb-2 border-b border-zinc-100"
+                                                            className="text-zinc-600 dark:text-zinc-400 text-sm block py-1 hover:text-accent transition-colors w-full text-left font-medium mb-2 pb-2 border-b border-zinc-100/50 dark:border-zinc-800/50"
                                                         >
                                                             Ver todos los productos
                                                         </button>
@@ -381,7 +418,7 @@ export const Navbar = () => {
                                                                     <button
                                                                         key={item.slug}
                                                                         onClick={() => handleProductCategoryClick(item.slug)}
-                                                                        className="text-zinc-600 text-sm block py-1 hover:text-accent transition-colors w-full text-left"
+                                                                        className="text-zinc-600 dark:text-zinc-400 text-sm block py-1 hover:text-accent transition-colors w-full text-left"
                                                                     >
                                                                         {item.name}
                                                                     </button>
@@ -397,7 +434,7 @@ export const Navbar = () => {
                                                 <Link
                                                     href={cat.href}
                                                     onClick={() => setIsOpen(false)}
-                                                    className="text-zinc-900 text-lg font-semibold block mb-2 hover:text-accent transition-colors"
+                                                    className="text-zinc-900 dark:text-white text-lg font-semibold block mb-2 hover:text-accent transition-colors"
                                                 >
                                                     {cat.title}
                                                 </Link>
@@ -412,7 +449,7 @@ export const Navbar = () => {
                                                                         key={item.href}
                                                                         href={item.href}
                                                                         onClick={() => setIsOpen(false)}
-                                                                        className="text-zinc-600 text-sm block py-1 hover:text-accent transition-colors"
+                                                                        className="text-zinc-600 dark:text-zinc-400 text-sm block py-1 hover:text-accent transition-colors"
                                                                     >
                                                                         {item.name}
                                                                     </Link>
@@ -427,16 +464,16 @@ export const Navbar = () => {
                                     </div>
                                 ))}
 
-                                <div className="pt-4 border-t border-zinc-200">
+                                <div className="pt-4 border-t border-zinc-200/50 dark:border-zinc-800/50">
                                     {session ? (
                                         <>
-                                            <div className="flex items-center gap-3 mb-4 p-3 bg-zinc-50 rounded-lg">
+                                            <div className="flex items-center gap-3 mb-4 p-3 bg-zinc-50/50 dark:bg-zinc-800/50 rounded-lg backdrop-blur-sm">
                                                 <User className="h-5 w-5 text-accent" />
                                                 <div>
-                                                    <p className="font-semibold text-zinc-900">
+                                                    <p className="font-semibold text-zinc-900 dark:text-white">
                                                         {session.user?.name || "Usuario"}
                                                     </p>
-                                                    <p className="text-xs text-zinc-500">
+                                                    <p className="text-xs text-zinc-500 dark:text-zinc-400">
                                                         {session.user?.email}
                                                     </p>
                                                 </div>
@@ -468,7 +505,7 @@ export const Navbar = () => {
                                         <Link
                                             href="/auth/login"
                                             onClick={() => setIsOpen(false)}
-                                            className="block bg-primary text-white text-center py-3 rounded-lg font-bold hover:bg-primary/90 transition-colors"
+                                            className="block bg-primary text-white text-center py-3 rounded-lg font-bold hover:bg-primary/90 transition-colors shadow-sm"
                                         >
                                             Ingresar
                                         </Link>
